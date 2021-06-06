@@ -7,3 +7,5 @@ Skill for Yandex Smart Home on Django | Навык для Умного дома 
 
 ![Создание_Application_в_админке](screenshots/2._Создание_Application_в_админке.jpg)
 
+Ссылка на описание API умного дома - https://yandex.ru/dev/dialogs/smart-home/doc/reference/resources.html
+
