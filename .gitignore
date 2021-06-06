@@ -1,6 +1,7 @@
 .idea/
 *.pem
 *.pyc
+*/migrations/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

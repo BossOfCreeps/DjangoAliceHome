@@ -16,6 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from main.views import Availability, Devices
+
 urlpatterns = [
-    path('', Availability.as_view(), name='checking availability')
+    path('', Availability.as_view(), name='availability'),
+    path('user/devices', Devices.as_view(), name='devices')
 ]
