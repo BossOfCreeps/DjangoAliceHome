@@ -3,3 +3,4 @@ djangorestframework>=3.12.4
 django-sslserver==0.22
 django-oauth-toolkit==1.5.0
 django-cors-middleware==1.5.0
+django-polymorphic==3.0.0

@@ -1,5 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
+from polymorphic.models import PolymorphicModel
+
+from main.constants import CAPABILITIES, PROPERTIES, DEVICE_TYPES
 
 
 class Manufacturer(models.Model):
@@ -12,45 +15,52 @@ class Manufacturer(models.Model):
         verbose_name = verbose_name_plural = "Производитель"
 
 
-class Type(models.Model):
-    """
-    https://yandex.ru/dev/dialogs/smart-home/doc/concepts/device-types.html
-    """
-    name = models.CharField("Тип", max_length=1024)
+class AbstractDevice(PolymorphicModel):
+    manufacturer = models.ForeignKey(Manufacturer, models.PROTECT, "devices", verbose_name="Производитель")
+    model = models.CharField("Название модели", max_length=1024)
+    type = models.CharField("Тип", choices=DEVICE_TYPES, max_length=64)
+    hw_version = models.CharField("Версия аппартаной части", max_length=256)
+    sw_version = models.CharField("Версия программной части", max_length=256)
+
+    def __str__(self):
+        return f"{self.manufacturer} {self.model}"
+
+    class Meta:
+        verbose_name = verbose_name_plural = "Абстрактное устройство"
 
 
 class Capability(models.Model):
     """
     https://yandex.ru/dev/dialogs/smart-home/doc/concepts/capability-types.html
     """
-    name = models.CharField("Умение", max_length=1024)
+    device = models.ForeignKey(AbstractDevice, models.CASCADE, "capabilities", verbose_name="Устройство")
+    type = models.CharField("Тип", choices=CAPABILITIES, max_length=64)
+    retrievable = models.BooleanField("Извлекаемый", default=True)
+    reportable = models.BooleanField("Отчетно", default=True)
+    parameters = models.JSONField("Параметры", blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.type} {self.device}"
+
+    class Meta:
+        verbose_name = verbose_name_plural = "Умение устройства"
 
 
 class Property(models.Model):
     """
     https://yandex.ru/dev/dialogs/smart-home/doc/concepts/properties-types.html
     """
-    name = models.CharField("Датчик", max_length=1024)
-
-
-class AbstractDevice(models.Model):
-    manufacturer = models.ForeignKey(Manufacturer, models.PROTECT, "%(class)s", verbose_name="Производитель")
-    model = models.CharField("Название модели", max_length=1024)
-    hw_version = models.CharField("Версия аппартаной части", max_length=256)
-    sw_version = models.CharField("Версия программной части", max_length=256)
-    type = models.ForeignKey(Type, models.PROTECT, "%(class)s", verbose_name="Тип")
-    capabilities = models.ManyToManyField(Capability, "%(class)s", verbose_name="Умения")
-    properties = models.ManyToManyField(Property, "%(class)s", verbose_name="Датчики")
+    device = models.ForeignKey(AbstractDevice, models.CASCADE, "properties", verbose_name="Устройство")
+    type = models.CharField("Тип", choices=PROPERTIES, max_length=64)
+    retrievable = models.BooleanField("Извлекаемый", default=True)
+    reportable = models.BooleanField("Отчетно", default=True)
+    parameters = models.JSONField("Параметры", blank=True, null=True)
 
     def __str__(self):
-        return f"{self.manufacturer} {self.model}"
+        return f"{self.type} {self.device}"
 
     class Meta:
-        verbose_name = verbose_name_plural = "Абстрактное устройтсво"
-
-
-class Button(AbstractDevice):
-    pass
+        verbose_name = verbose_name_plural = "Датчик устройства"
 
 
 class Room(models.Model):
@@ -66,15 +76,12 @@ class Room(models.Model):
 
 class UserDevice(models.Model):
     user = models.ForeignKey(User, models.CASCADE, "devices", verbose_name="Пользователь")
-    device = models.ForeignKey("AbstractDevice", models.PROTECT, verbose_name="Устройство")
     name = models.CharField("Название устройства", max_length=1024)
     description = models.TextField("Описание", null=True, blank=True)
     room = models.ForeignKey(Room, models.PROTECT, "devices", verbose_name="Комната", null=True, blank=True)
+    device = models.ForeignKey(AbstractDevice, models.PROTECT, "user_devices", verbose_name="Устройство")
+    custom_data = models.JSONField(null=True, blank=True)
+    device_info = models.JSONField(null=True, blank=True)
 
-    @property
-    def custom_data(self):
-        return None
-
-    @property
-    def device_info(self):
-        return None
+    class Meta:
+        verbose_name = verbose_name_plural = "Устройства пользователя"
