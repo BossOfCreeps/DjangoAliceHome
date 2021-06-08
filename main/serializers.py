@@ -3,7 +3,37 @@ from abc import abstractmethod
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from main.models import UserDevice, AbstractDevice, Capability
+from main.models import Capability, Property, CapabilityState, AbstractDevice, UserDevice
+
+
+class CapabilityStateSerializer(serializers.ModelSerializer):
+    instance = serializers.CharField()
+    action_result = serializers.SerializerMethodField()
+    value = serializers.CharField()
+
+    def get_action_result(self, obj):
+        return {"status": "DONE"}
+
+    class Meta:
+        model = CapabilityState
+        fields = ("instance", "value", "action_result")
+
+
+class CapabilitySerializer(serializers.ModelSerializer):
+    type = serializers.CharField(source="get_type_display")
+    state = CapabilityStateSerializer()
+
+    class Meta:
+        model = Capability
+        fields = ("type", "state", "retrievable", "parameters",)
+
+
+class PropertySerializer(serializers.ModelSerializer):
+    type = serializers.CharField(source="get_type_display")
+
+    class Meta:
+        model = Property
+        fields = ("type", "retrievable", "parameters",)
 
 
 class AbstractDeviceSerializer(serializers.ModelSerializer):
@@ -12,22 +42,6 @@ class AbstractDeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = AbstractDevice
         fields = ("manufacturer", "model", "hw_version", "sw_version")
-
-
-class CapabilitySerializer(serializers.ModelSerializer):
-    type = serializers.CharField(source="get_type_display")
-
-    class Meta:
-        model = Capability
-        fields = ("type", "retrievable", "parameters",)
-
-
-class PropertySerializer(serializers.ModelSerializer):
-    type = serializers.CharField(source="get_type_display")
-
-    class Meta:
-        model = Capability
-        fields = ("type", "retrievable", "parameters",)
 
 
 class DeviceSerializer(serializers.ModelSerializer):
@@ -53,13 +67,11 @@ class PayloadSerializer(serializers.ModelSerializer):
 
 
 class DevicesSerializer(serializers.Serializer):
-    """
-    https://yandex.ru/dev/dialogs/smart-home/doc/reference/get-devices.html
-    """
-
     request_id = serializers.CharField()
     payload = serializers.SerializerMethodField()
 
     @abstractmethod
     def get_payload(self, obj):
         return PayloadSerializer(obj["user"]).data
+
+

@@ -128,7 +128,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Allow CORS requests from all domains
 CORS_ORIGIN_ALLOW_ALL = True
 
-AUTHENTICATION_BACKENDS = (
-    'oauth2_provider.backends.OAuth2Backend',
-    "django.contrib.auth.backends.ModelBackend",
-)
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+    ]
+}

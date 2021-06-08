@@ -46,6 +46,18 @@ class Capability(models.Model):
         verbose_name = verbose_name_plural = "Умение устройства"
 
 
+class CapabilityState(models.Model):
+    capability = models.OneToOneField(Capability, models.CASCADE, related_name="state", verbose_name="Умение")
+    instance = models.CharField("Единица измерения", max_length=256)
+    value = models.JSONField("Состояние")
+
+    def __str__(self):
+        return f"{self.capability} {self.instance}"
+
+    class Meta:
+        verbose_name = verbose_name_plural = "Состояние умения устройства"
+
+
 class Property(models.Model):
     """
     https://yandex.ru/dev/dialogs/smart-home/doc/concepts/properties-types.html
@@ -82,6 +94,9 @@ class UserDevice(models.Model):
     device = models.ForeignKey(AbstractDevice, models.PROTECT, "user_devices", verbose_name="Устройство")
     custom_data = models.JSONField(null=True, blank=True)
     device_info = models.JSONField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name}"
 
     class Meta:
         verbose_name = verbose_name_plural = "Устройства пользователя"
