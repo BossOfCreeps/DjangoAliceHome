@@ -9,10 +9,13 @@ from main.models import Capability, Property, CapabilityState, AbstractDevice, U
 class CapabilityStateSerializer(serializers.ModelSerializer):
     instance = serializers.CharField()
     action_result = serializers.SerializerMethodField()
-    value = serializers.CharField()
+    value = serializers.SerializerMethodField()
 
     def get_action_result(self, obj):
         return {"status": "DONE"}
+
+    def get_value(self, obj):
+        return obj.value
 
     class Meta:
         model = CapabilityState
@@ -73,5 +76,3 @@ class DevicesSerializer(serializers.Serializer):
     @abstractmethod
     def get_payload(self, obj):
         return PayloadSerializer(obj["user"]).data
-
-

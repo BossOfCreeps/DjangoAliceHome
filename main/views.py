@@ -46,3 +46,12 @@ class Action(APIView):
                         dev_c.state.save()
 
         return Response(DevicesSerializer({"request_id": get_id(request), "user": request.user}).data)
+
+
+class Query(APIView):
+    """
+    https://yandex.ru/dev/dialogs/smart-home/doc/reference/post-devices-query.html
+    """
+
+    def post(self, request, *args, **kwargs):
+        return Response(DevicesSerializer({"request_id": get_id(request), "user": request.user}).data)

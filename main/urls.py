@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.urls import path
 
-from main.views import Check, Devices, Action
+from main.views import Check, Devices, Action, Query
 
 """
 https://yandex.ru/dev/dialogs/smart-home/doc/reference/resources.html
@@ -24,4 +24,5 @@ urlpatterns = [
     path('', Check.as_view(), name='availability'),
     path('user/devices', Devices.as_view(), name='devices'),
     path('user/devices/action', Action.as_view(), name='action'),
+    path('user/devices/query', Query.as_view(), name='action'),
 ]
